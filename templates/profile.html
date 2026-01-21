@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h2>Profile</h2>
+    <div style="padding: 20px 0;">
+        <p style="font-size: 1.1rem;"><strong>Email:</strong> {{ session['user_email'] }}</p>
+        </div>
+
+    <div class="profile-upload" style="margin-top: 20px; border-top: 1px solid #dee2e6; padding-top: 20px;">
+        <h4>Update Profile Photo</h4>
+        <form>
+            <input type="file" name="profile_photo">
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Upload Photo</button>
+        </form>
+        <small style="display: block; margin-top: 10px; color: #6c757d;">(Note: This feature is for demonstration and is not yet functional.)</small>
+    </div>
+</div>
+{% endblock %}

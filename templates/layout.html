@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - HostVault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-cloud"></i>
+            <span>HostVault</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fas fa-folder"></i> All files</a></li>
+            <li><a href="#"><i class="fas fa-clock"></i> Recent</a></li>
+            <li><a href="#"><i class="fas fa-star"></i> Favorites</a></li>
+            <li><a href="#"><i class="fas fa-trash"></i> Deleted files</a></li>
+        </ul>
+    </aside>
+
+    <div class="main-content">
+        <header class="header">
+            <a href="{{ url_for('profile') }}" class="btn btn-primary">Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </header>
+
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

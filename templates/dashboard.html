@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+{% block title %}All Files{% endblock %}
+
+{% block content %}
+<div class="upload-card">
+  <h3>Upload a New File</h3>
+  <form class="upload-form" method="post" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button type="submit" class="btn btn-primary">
+          <i class="fas fa-upload"></i> Upload
+      </button>
+  </form>
+  <progress id="uploadProgress" value="0" max="100" style="width:100%; margin-top:10px; display:none;"></progress>
+  <div id="progressText" style="text-align:center; color:#007bff; display:none;">0%</div>
+</div>
+
+<div class="files-card">
+  <h3>Your Files</h3>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="file-list">
+    {% for file in files %}
+      <div class="file-list-item">
+        <div class="file-icon"><i class="fas fa-file-alt"></i></div>
+        <div class="file-info">
+          <div class="file-name">{{ file.filename }}</div>
+          <div class="file-meta">
+            <small>📅 {{ file.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</small> |
+            <small>💾 {{ (file.size / 1024) | round(2) }} KB</small>
+          </div>
+        </div>
+        <div class="file-actions">
+          <a href="{{ url_for('download_file', file_id=file.id) }}" 
+             class="btn btn-success download-btn" 
+             data-filename="{{ file.filename }}">
+             <i class="fas fa-download"></i>
+          </a>
+          <form action="{{ url_for('delete_file', file_id=file.id) }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this file?');"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div style="text-align:center; padding:40px; color:gray;">No files uploaded yet.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+/* Toast Center Animation */
+@keyframes popup {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+  20%, 80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+}
+
+/* Backdrop Blur for Toast */
+#toast-blur {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Toast Box Style */
+.toast-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 18px 28px;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  z-index: 9999;
+  animation: popup 2.5s ease forwards;
+}
+</style>
+
+<script>
+/* Toast with Center Animation + Optional Blur */
+const showToast = (text, color = '#28a745') => {
+  // Create blur overlay
+  const blur = document.createElement('div');
+  blur.id = 'toast-blur';
+  document.body.appendChild(blur);
+  setTimeout(() => (blur.style.opacity = '1'), 10);
+
+  // Create toast box
+  const toast = document.createElement('div');
+  toast.classList.add('toast-center');
+  toast.style.backgroundColor = color;
+  toast.textContent = text;
+  document.body.appendChild(toast);
+
+  // Remove after animation
+  setTimeout(() => {
+    blur.style.opacity = '0';
+    setTimeout(() => blur.remove(), 300);
+    toast.remove();
+  }, 2500);
+};
+
+/* Upload with Progress Bar */
+document.querySelector('.upload-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const progress = document.getElementById('uploadProgress');
+  const text = document.getElementById('progressText');
+  const xhr = new XMLHttpRequest();
+
+  xhr.open('POST', form.action, true);
+
+  xhr.upload.onprogress = function (event) {
+    if (event.lengthComputable) {
+      const percent = Math.round((event.loaded / event.total) * 100);
+      progress.style.display = 'block';
+      text.style.display = 'block';
+      progress.value = percent;
+      text.innerText = percent + '%';
+    }
+  };
+
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      progress.value = 100;
+      text.innerText = '100%';
+      showToast('✅ File uploaded successfully!');
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      showToast('❌ Upload failed!', '#dc3545');
+    }
+  };
+
+  xhr.onerror = () => showToast('❌ Network error.', '#dc3545');
+  xhr.send(data);
+});
+
+/* Download success toast */
+document.querySelectorAll('.download-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    const url = btn.getAttribute('href');
+    const name = btn.getAttribute('data-filename');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => showToast(`✅ File "${name}" downloaded successfully!`), 1000);
+  });
+});
+</script>
+{% endblock %}

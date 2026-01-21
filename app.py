@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(mes
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'a-very-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://funcloud_user:sura@10.240.105.210/database'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -251,3 +251,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=8001, debug=True)
+
